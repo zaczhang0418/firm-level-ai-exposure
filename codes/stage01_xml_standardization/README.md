@@ -209,7 +209,10 @@ python3 codes/stage01_xml_standardization/parse_xml.py --year 2013 --limit 5
 Full single-year run:
 
 ```bash
-python3 codes/stage01_xml_standardization/parse_xml.py --year 2001 --limit 0
+python3 codes/stage01_xml_standardization/parse_xml.py \
+  --year 2001 \
+  --limit 0 \
+  --output-dir codes/stage01_xml_standardization/outputs/by_year/2001
 ```
 
 Full all-year run:
@@ -218,10 +221,53 @@ Full all-year run:
 python3 codes/stage01_xml_standardization/parse_xml.py --limit 0
 ```
 
+For production work, prefer the single-year command above and run it year by year. A single all-year output can become very large and harder to inspect.
+
 For large all-year runs, use a stronger machine and keep raw XML at:
 
 ```text
 Data/Data_Conference call transcripts/
+```
+
+## Recommended Output Layout
+
+For 2001-2024 production runs, the recommended structure is:
+
+```text
+codes/stage01_xml_standardization/outputs/
+  by_year/
+    2001/
+      transcript_metadata.csv
+      transcript_sentences.csv
+    2002/
+      transcript_metadata.csv
+      transcript_sentences.csv
+    ...
+    2024/
+      transcript_metadata.csv
+      transcript_sentences.csv
+```
+
+So the production output is not just 24 CSV files. It is better to think of it as 24 yearly batches, and each yearly batch has two core CSV files:
+
+```text
+transcript_metadata.csv
+transcript_sentences.csv
+```
+
+That means 48 core CSV files for 2001-2024.
+
+Reason:
+
+1. `transcript_metadata.csv` is one row per XML/call and is used for identifier checking.
+2. `transcript_sentences.csv` is one row per sentence and is used for candidate extraction and exposure construction.
+3. Keeping years separate makes large runs easier to inspect, rerun, and move across machines.
+
+After all yearly outputs pass quality checks, a later helper script can combine them into all-year files if needed:
+
+```text
+outputs/all_years/transcript_metadata_all.csv
+outputs/all_years/transcript_sentences_all.csv
 ```
 
 ## Current Test Results
@@ -234,6 +280,22 @@ The script has been tested on:
 ```
 
 The 2001 sample confirms the fallback section behavior for older transcript formats that use `Transcript` rather than clear `Presentation` / `Questions and Answers` headings.
+
+## Section Fallback Rule
+
+Some early transcript files do not have clean `Presentation` and `Questions and Answers` headings. For example, some 2001 files use only:
+
+```text
+Transcript
+```
+
+In those cases, the parser does not drop the text. It keeps all parsed sentences and assigns:
+
+```text
+section = transcript
+```
+
+This is intentional. It preserves the denominator and keeps the text available for later AI candidate extraction. It also makes these older-format files auditable: later we can decide whether to improve Q&A detection for them or keep them as a single transcript section.
 
 ## Known Limitations
 
