@@ -1,0 +1,13 @@
+term,status,reason,possible_future_use
+data,exclude,"Too broad; appears in almost all modern business discussions","Use only in context with model/training/AI terms"
+digital,exclude,"Too broad; digital transformation is not necessarily AI","Use for validation or separate digital exposure"
+cloud,exclude,"Cloud infrastructure is not necessarily AI","Use only near AI infrastructure terms"
+software,exclude,"Too broad and industry-general","Use only with AI/model context"
+technology,exclude,"Too broad and would create many false positives","Use only for descriptive controls"
+platform,exclude,"Too broad without AI modifier","Use with AI platform or model platform context"
+analytics,review,"Can be AI-related but often generic business intelligence","Review after Word2Vec and candidate sentence sampling"
+automation,review,"Can be AI-related or simple process automation","Review with context or classifier"
+algorithm,review,"Can be AI-related but also generic computation","Review after candidate sentence inspection"
+model,exclude,"Too broad as standalone term","Use with AI model/predictive model/foundation model"
+prediction,review,"Relevant to AI-as-prediction literature but broad","Review with context"
+big data,review,"AI-adjacent but not necessarily AI","Consider as secondary term after validation"

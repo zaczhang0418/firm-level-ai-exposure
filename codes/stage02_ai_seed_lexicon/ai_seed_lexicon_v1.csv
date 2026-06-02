@@ -1,16 +1,68 @@
-concept_group,term,source_note,include
-core_ai,artificial intelligence,literature seed,1
-core_ai,machine learning,literature seed,1
-core_ai,deep learning,literature seed,1
-core_ai,neural network,literature seed,1
-gen_ai,generative ai,literature seed,1
-gen_ai,large language model,literature seed,1
-gen_ai,llm,literature seed,1
-gen_ai,chatgpt,literature seed,1
-gen_ai,foundation model,literature seed,1
-automation_ai,natural language processing,literature seed,1
-automation_ai,computer vision,literature seed,1
-automation_ai,predictive analytics,literature seed,1
-business_use,ai platform,literature seed,1
-business_use,recommendation engine,literature seed,1
-business_use,automated decision,literature seed,1
+concept_group,term,match_type,priority,include,reference_count,total_hit_count,reference_ids,reference_hit_counts,evidence_terms,notes
+core_ai,artificial intelligence,phrase,high,1,16,334,AI01;AI02;AI04;AI05;AI06;AI07;AI08;AI09;AI10;AI11;AI12;AI13;AI14;AI15;AI16;AI17,AI01:1;AI02:2;AI04:28;AI05:7;AI06:6;AI07:1;AI08:2;AI09:4;AI10:2;AI11:1;AI12:43;AI13:10;AI14:14;AI15:17;AI16:168;AI17:28,Artificial intelligence,Literature-discovered umbrella expression
+core_ai,AI,word_boundary,medium,1,1,1,AI13,AI13:1,AI,Literature-discovered acronym; use strict word-boundary matching
+core_ai,artificial intelligence technologies,phrase,medium,1,5,6,AI04;AI06;AI09;AI15;AI16,AI04:2;AI06:1;AI09:1;AI15:1;AI16:1,artificial intelligence technologies,Literature-discovered expression for AI technology category
+core_ai,artificial intelligence technology,phrase,medium,1,1,3,AI16,AI16:3,artificial intelligence technology,Singular version; less frequent than plural
+core_ai,machine learning,phrase,high,1,16,96,AI01;AI02;AI03;AI04;AI05;AI06;AI07;AI09;AI10;AI12;AI13;AI14;AI15;AI16;AI17;AI18,AI01:11;AI02:7;AI03:6;AI04:7;AI05:5;AI06:3;AI07:1;AI09:5;AI10:1;AI12:12;AI13:4;AI14:14;AI15:1;AI16:11;AI17:2;AI18:6,machine learning,Literature-discovered canonical ML expression
+core_ai,deep learning,phrase,high,1,11,27,AI01;AI02;AI03;AI04;AI05;AI06;AI09;AI12;AI13;AI16;AI17,AI01:3;AI02:1;AI03:1;AI04:1;AI05:5;AI06:1;AI09:2;AI12:2;AI13:1;AI16:2;AI17:8,deep learning,Literature-discovered canonical AI method
+core_ai,neural network,phrase,high,1,5,9,AI02;AI03;AI05;AI06;AI15,AI02:2;AI03:4;AI05:1;AI06:1;AI15:1,Neural Network,Literature-discovered method expression
+core_ai,neural networks,phrase,high,1,4,7,AI03;AI12;AI14;AI17,AI03:1;AI12:2;AI14:1;AI17:3,neural networks,Plural form discovered in references
+ai_activity,AI investments,phrase,high,1,6,471,AI01;AI02;AI03;AI04;AI05;AI12,AI01:150;AI02:71;AI03:87;AI04:133;AI05:1;AI12:29,AI investments,Major literature-discovered expression for firm AI investment
+ai_activity,AI investment,phrase,medium,1,8,15,AI02;AI03;AI04;AI05;AI09;AI11;AI12;AI13,AI02:1;AI03:2;AI04:6;AI05:1;AI09:2;AI11:1;AI12:1;AI13:1,AI investment,Singular form discovered in references
+ai_activity,AI adoption,phrase,high,1,10,61,AI01;AI02;AI03;AI09;AI11;AI12;AI13;AI14;AI15;AI16,AI01:11;AI02:1;AI03:2;AI09:13;AI11:1;AI12:23;AI13:1;AI14:1;AI15:5;AI16:3,AI adoption,Literature-discovered expression for firm/investor adoption
+ai_activity,Artificial intelligence adoption,phrase,medium,1,2,3,AI15;AI16,AI15:1;AI16:2,Artificial intelligence adoption,Expanded version of AI adoption
+ai_activity,AI implementation,phrase,medium,1,4,7,AI01;AI03;AI04;AI12,AI01:3;AI03:1;AI04:1;AI12:2,AI implementation,Literature-discovered implementation expression
+ai_activity,AI integration,phrase,medium,1,2,2,AI02;AI15,AI02:1;AI15:1,AI integration,Literature-discovered integration expression
+ai_activity,AI capabilities,phrase,medium,1,2,6,AI05;AI14,AI05:1;AI14:5,AI capabilities,Literature-discovered firm capability expression
+ai_activity,AI solutions,phrase,medium,1,3,6,AI01;AI04;AI12,AI01:4;AI04:1;AI12:1,AI solutions,Literature-discovered solution/product expression
+ai_activity,AI software,phrase,review,0,4,8,AI01;AI02;AI03;AI12,AI01:3;AI02:2;AI03:2;AI12:1,AI software,Discovered but may be broad; hold for candidate inspection
+ai_technology,AI technologies,phrase,high,1,9,77,AI01;AI02;AI03;AI04;AI06;AI09;AI12;AI13;AI14,AI01:30;AI02:5;AI03:14;AI04:8;AI06:7;AI09:4;AI12:4;AI13:4;AI14:1,AI technologies,Literature-discovered plural technology expression
+ai_technology,AI technology,phrase,medium,1,9,33,AI01;AI03;AI04;AI05;AI06;AI09;AI13;AI14;AI15,AI01:1;AI03:3;AI04:8;AI05:4;AI06:7;AI09:6;AI13:1;AI14:2;AI15:1,AI technology,Literature-discovered singular technology expression
+ai_technology,AI tools,phrase,medium,1,10,29,AI01;AI03;AI05;AI06;AI08;AI09;AI11;AI12;AI14;AI16,AI01:2;AI03:2;AI05:4;AI06:2;AI08:5;AI09:9;AI11:1;AI12:2;AI14:1;AI16:1,AI tools,Literature-discovered tools expression
+ai_technology,AI tool,phrase,medium,1,2,6,AI07;AI09,AI07:2;AI09:4,AI tool,Singular form discovered in references
+ai_technology,AI models,phrase,medium,1,8,39,AI01;AI02;AI05;AI06;AI07;AI09;AI10;AI14,AI01:1;AI02:1;AI05:3;AI06:2;AI07:3;AI09:1;AI10:24;AI14:4,AI models,Literature-discovered model expression
+ai_technology,AI model,phrase,medium,1,5,33,AI07;AI08;AI09;AI10;AI14,AI07:2;AI08:4;AI09:1;AI10:4;AI14:22,AI model,Singular form discovered in references
+ai_technology,AI applications,phrase,medium,1,6,12,AI01;AI03;AI09;AI11;AI12;AI16,AI01:3;AI03:1;AI09:2;AI11:2;AI12:3;AI16:1,AI applications,Literature-discovered application expression
+ai_technology,AI application,phrase,medium,1,1,1,AI17,AI17:1,AI application,Singular form; sparse but direct
+ai_workforce,AI skills,phrase,medium,1,7,34,AI01;AI02;AI03;AI04;AI11;AI12;AI13,AI01:9;AI02:5;AI03:10;AI04:3;AI11:1;AI12:4;AI13:2,AI skills,Literature-discovered workforce/skill expression
+ai_workforce,AI workers,phrase,medium,1,5,249,AI01;AI02;AI03;AI04;AI12,AI01:45;AI02:49;AI03:49;AI04:63;AI12:43,AI workers,Literature-discovered worker expression
+ai_workforce,AI worker,phrase,medium,1,2,5,AI04;AI12,AI04:3;AI12:2,AI worker,Singular form discovered in references
+ai_workforce,AI-skilled labor,phrase,high,1,5,15,AI01;AI02;AI03;AI04;AI12,AI01:6;AI02:1;AI03:6;AI04:1;AI12:1,AI-skilled labor,Strong literature-discovered human-capital expression
+ai_workforce,AI-skilled workers,phrase,medium,1,3,14,AI01;AI04;AI09,AI01:10;AI04:1;AI09:3,AI-skilled workers,Literature-discovered worker expression
+ai_workforce,AI-skilled human capital,phrase,medium,1,4,9,AI01;AI03;AI04;AI09,AI01:4;AI03:1;AI04:3;AI09:1,AI-skilled human capital,Literature-discovered human-capital expression
+ai_workforce,AI-related skills,phrase,medium,1,3,7,AI01;AI03;AI13,AI01:4;AI03:1;AI13:2,AI-related skills,Literature-discovered related-skills expression
+ai_workforce,AI-related jobs,phrase,medium,1,3,4,AI01;AI03;AI13,AI01:2;AI03:1;AI13:1,AI-related jobs,Literature-discovered jobs expression
+ai_workforce,AI job,phrase,review,0,6,13,AI01;AI02;AI04;AI12;AI13;AI14,AI01:1;AI02:5;AI04:3;AI12:1;AI13:2;AI14:1,AI job,Discovered but may be measurement/reporting language; review before use
+ai_exposure,AI exposure,phrase,high,1,4,144,AI05;AI06;AI15;AI16,AI05:14;AI06:127;AI15:2;AI16:1,AI exposure,Literature-discovered exposure expression
+ai_exposure,AI intensity,phrase,medium,1,1,121,AI11,AI11:121,AI intensity,Literature-discovered intensity expression; mostly one source
+ai_exposure,firm-level AI,phrase,medium,1,4,16,AI04;AI05;AI08;AI12,AI04:10;AI05:1;AI08:3;AI12:2,firm-level AI,Literature-discovered firm-level expression
+gen_ai,Generative AI,phrase,high,1,9,519,AI04;AI05;AI06;AI07;AI08;AI09;AI10;AI15;AI16,AI04:2;AI05:79;AI06:233;AI07:1;AI08:17;AI09:105;AI10:76;AI15:1;AI16:5,Generative AI,Literature-discovered GenAI expression
+gen_ai,generative artificial intelligence,phrase,high,1,4,4,AI06;AI10;AI15;AI16,AI06:1;AI10:1;AI15:1;AI16:1,generative artificial intelligence,Expanded GenAI expression discovered in references
+gen_ai,Generative AI exposure,phrase,medium,1,2,18,AI05;AI06,AI05:2;AI06:16,Generative AI exposure,Literature-discovered GenAI exposure expression
+gen_ai,Generative AI technologies,phrase,medium,1,2,3,AI06;AI09,AI06:2;AI09:1,Generative AI technologies,Literature-discovered GenAI technology expression
+gen_ai,Generative AI technology,phrase,medium,1,2,3,AI06;AI09,AI06:2;AI09:1,Generative AI technology,Singular GenAI technology expression
+gen_ai,Generative AI tools,phrase,medium,1,3,3,AI06;AI08;AI09,AI06:1;AI08:1;AI09:1,Generative AI tools,Literature-discovered GenAI tools expression
+gen_ai,Generative AI models,phrase,medium,1,2,7,AI05;AI10,AI05:1;AI10:6,Generative AI models,Literature-discovered GenAI model expression
+gen_ai,large language models,phrase,high,1,7,26,AI05;AI06;AI07;AI08;AI09;AI10;AI15,AI05:6;AI06:7;AI07:4;AI08:2;AI09:1;AI10:4;AI15:2,large language models,Literature-discovered LLM expression
+gen_ai,large language model,phrase,high,1,5,11,AI05;AI06;AI07;AI08;AI09,AI05:4;AI06:2;AI07:3;AI08:1;AI09:1,large language model,Singular LLM expression
+gen_ai,LLMs,word_boundary,high,1,6,62,AI05;AI06;AI07;AI08;AI10;AI15,AI05:52;AI06:3;AI07:1;AI08:1;AI10:1;AI15:4,LLMs,Literature-discovered plural acronym
+gen_ai,LLM,word_boundary,high,1,5,105,AI05;AI06;AI07;AI09;AI15,AI05:71;AI06:29;AI07:2;AI09:1;AI15:2,LLM,Literature-discovered acronym
+gen_ai,ChatGPT,word_boundary,high,1,8,586,AI05;AI06;AI07;AI08;AI09;AI10;AI15;AI16,AI05:28;AI06:113;AI07:239;AI08:31;AI09:129;AI10:22;AI15:16;AI16:8,ChatGPT,Literature-discovered product/model expression
+gen_ai,GPT,word_boundary,medium,1,7,42,AI01;AI05;AI06;AI07;AI08;AI09;AI17,AI01:1;AI05:7;AI06:14;AI07:3;AI08:2;AI09:13;AI17:2,GPT,Literature-discovered acronym; review false positives
+gen_ai,GPT-4,word_boundary,medium,1,4,6,AI05;AI06;AI10;AI15,AI05:2;AI06:1;AI10:2;AI15:1,GPT-4,Literature-discovered model name
+gen_ai,GPT-3,word_boundary,medium,1,2,5,AI09;AI10,AI09:2;AI10:3,GPT-3,Literature-discovered model name
+gen_ai,Generative Pre-trained Transformer,phrase,medium,1,3,3,AI07;AI08;AI09,AI07:1;AI08:1;AI09:1,Generative Pre-trained Transformer,Literature-discovered expanded GPT expression
+ai_methods,natural language processing,phrase,high,1,10,23,AI01;AI02;AI03;AI04;AI05;AI07;AI09;AI12;AI13;AI15,AI01:5;AI02:3;AI03:4;AI04:3;AI05:3;AI07:1;AI09:1;AI12:1;AI13:1;AI15:1,natural language processing,Literature-discovered NLP expression
+ai_methods,NLP,word_boundary,medium,1,9,0,AI01;AI03;AI04;AI05;AI06;AI10;AI11;AI12;AI14,AI01:0;AI03:0;AI04:0;AI05:0;AI06:0;AI10:0;AI11:0;AI12:0;AI14:0,NLP,Literature-discovered acronym
+ai_methods,computer vision,phrase,high,1,5,19,AI01;AI02;AI03;AI04;AI13,AI01:7;AI02:4;AI03:3;AI04:4;AI13:1,computer vision,Literature-discovered AI subfield
+ai_methods,image recognition,phrase,medium,1,4,4,AI01;AI12;AI13;AI16,AI01:1;AI12:1;AI13:1;AI16:1,image recognition,Literature-discovered application expression
+ai_methods,reinforcement learning,phrase,medium,1,6,8,AI07;AI08;AI09;AI13;AI14;AI18,AI07:1;AI08:1;AI09:2;AI13:2;AI14:1;AI18:1,reinforcement learning,Literature-discovered method expression
+ai_methods,supervised learning,phrase,medium,1,3,4,AI01;AI02;AI03,AI01:1;AI02:2;AI03:1,supervised learning,Literature-discovered method expression
+ai_applications,AI analyst,phrase,medium,1,1,24,AI14,AI14:24,AI analyst,Specific literature-discovered application from stock analysis paper
+ai_applications,AI analysts,phrase,medium,1,1,1,AI14,AI14:1,AI analysts,Plural form
+ai_applications,automated underwriting,phrase,medium,1,1,0,AI19,AI19:0,automated underwriting,Specific machine-decision application from automated underwriting paper
+automation_robotics,robotics,word_boundary,medium,1,8,0,AI01;AI02;AI04;AI05;AI12;AI15;AI16;AI17,AI01:0;AI02:0;AI04:0;AI05:0;AI12:0;AI15:0;AI16:0;AI17:0,robotics,Literature-discovered robotics expression
+automation_robotics,robotic process automation,phrase,medium,1,1,3,AI12,AI12:3,robotic process automation,Literature-discovered audit/process automation expression
+review_only,automation,word_boundary,review,0,13,0,AI01;AI02;AI03;AI05;AI06;AI08;AI11;AI12;AI13;AI15;AI16;AI17;AI19,AI01:0;AI02:0;AI03:0;AI05:0;AI06:0;AI08:0;AI11:0;AI12:0;AI13:0;AI15:0;AI16:0;AI17:0;AI19:0,automation,Literature-discovered but too broad as standalone seed
+review_only,recommendation,word_boundary,review,0,10,0,AI02;AI06;AI09;AI10;AI11;AI12;AI13;AI14;AI15;AI17,AI02:0;AI06:0;AI09:0;AI10:0;AI11:0;AI12:0;AI13:0;AI14:0;AI15:0;AI17:0,recommendation,Literature-discovered but too broad as standalone seed
+review_only,algorithmic,word_boundary,review,0,7,0,AI04;AI09;AI14;AI15;AI16;AI17;AI19,AI04:0;AI09:0;AI14:0;AI15:0;AI16:0;AI17:0;AI19:0,algorithmic,Literature-discovered but too broad as standalone seed
