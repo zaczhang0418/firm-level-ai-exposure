@@ -1,0 +1,35 @@
+# macOS
+.DS_Store
+
+# Raw and reference data are too large for GitHub.
+Data/
+Reference/
+程序包/
+
+# Large standalone files at project root.
+*.pdf
+*.zip
+*.xml
+*.dta
+*.bin
+*.xlsx
+网址.txt
+
+# Generated pipeline outputs.
+codes/**/outputs/*
+!codes/**/outputs/.gitkeep
+codes/**/logs/*
+!codes/**/logs/.gitkeep
+
+# Python runtime artifacts.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local environments and secrets.
+.env
+.venv/
+venv/
+env/

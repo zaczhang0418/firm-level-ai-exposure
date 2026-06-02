@@ -1,0 +1,16 @@
+concept_group,term,source_note,include
+core_ai,artificial intelligence,literature seed,1
+core_ai,machine learning,literature seed,1
+core_ai,deep learning,literature seed,1
+core_ai,neural network,literature seed,1
+gen_ai,generative ai,literature seed,1
+gen_ai,large language model,literature seed,1
+gen_ai,llm,literature seed,1
+gen_ai,chatgpt,literature seed,1
+gen_ai,foundation model,literature seed,1
+automation_ai,natural language processing,literature seed,1
+automation_ai,computer vision,literature seed,1
+automation_ai,predictive analytics,literature seed,1
+business_use,ai platform,literature seed,1
+business_use,recommendation engine,literature seed,1
+business_use,automated decision,literature seed,1
