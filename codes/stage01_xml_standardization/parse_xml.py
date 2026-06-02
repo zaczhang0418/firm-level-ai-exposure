@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import csv
 import re
+import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from datetime import date
@@ -131,6 +132,30 @@ def list_xml_files(input_dir: Path, year: str | None) -> list[Path]:
     search_dir = input_dir / year if year else input_dir
     pattern = "*.xml" if year else "*/*.xml"
     return sorted(search_dir.glob(pattern))
+
+
+def format_elapsed(seconds: float) -> str:
+    seconds = max(0, int(seconds))
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    if hours:
+        return f"{hours:d}h{minutes:02d}m{seconds:02d}s"
+    return f"{minutes:02d}m{seconds:02d}s"
+
+
+def progress_line(current: int, total: int, started_at: float) -> str:
+    width = 30
+    ratio = current / total if total else 1
+    filled = min(width, int(ratio * width))
+    bar = "#" * filled + "-" * (width - filled)
+    elapsed = time.monotonic() - started_at
+    rate = current / elapsed if elapsed > 0 else 0
+    return (
+        f"Progress [{bar}] {ratio * 100:5.1f}% "
+        f"{current}/{total} XML "
+        f"elapsed={format_elapsed(elapsed)} "
+        f"rate={rate:,.1f}/s"
+    )
 
 
 def clean_text(value: str | None) -> str:
@@ -373,9 +398,14 @@ def main() -> None:
 
     xml_files = list_xml_files(input_dir, args.year)
     sample_files = xml_files if args.limit <= 0 else xml_files[: args.limit]
+    total_files = len(sample_files)
 
     metadata_path = output_dir / "transcript_metadata.csv"
     sentences_path = output_dir / "transcript_sentences.csv"
+
+    print(f"Found {len(xml_files)} XML files.")
+    print(f"Parsing {total_files} XML files.")
+    started_at = time.monotonic()
 
     metadata_count = 0
     sentence_count = 0
@@ -394,10 +424,9 @@ def main() -> None:
                     sentences_writer.writerow(sentence_row)
                     sentence_count += 1
 
-                if args.progress_every > 0 and idx % args.progress_every == 0:
-                    print(f"Parsed {idx} XML files...")
+                if args.progress_every > 0 and (idx % args.progress_every == 0 or idx == total_files):
+                    print(progress_line(idx, total_files, started_at), flush=True)
 
-    print(f"Found {len(xml_files)} XML files.")
     print(f"Parsed {len(sample_files)} XML files.")
     print(f"Wrote {metadata_count} transcript metadata rows.")
     print(f"Wrote {sentence_count} sentence rows.")
