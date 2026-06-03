@@ -23,10 +23,10 @@ The project is organized by workflow stage, similar to branch names. Each stage 
 We are currently in:
 
 ```text
-stage01_xml_standardization
+stage03_candidate_sentence_extraction
 ```
 
-The goal is not to detect AI yet. The goal is to standardize XML transcripts into clean CSV tables that can later link to ticker, gvkey, firm-year, and firm-quarter identifiers.
+The goal is to use the Stage 02 AI seed lexicon to extract high-recall AI candidate sentences from the standardized Stage 01 transcript sentence table. This is still not the final AI exposure measure; it prepares the sentence pool for Word2Vec review, manual screening, and classifier filtering.
 
 ## Naming Principle
 
@@ -47,4 +47,3 @@ stage07_exposure_aggregation
 ## Data Principle
 
 Raw XML data should not be modified. Each stage should write clean outputs into that stage's `outputs/` folder or a shared output location documented in the stage README.
-

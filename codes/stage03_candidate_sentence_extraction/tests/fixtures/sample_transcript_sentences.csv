@@ -1,0 +1,5 @@
+document_id,event_id,company_name,ticker,call_date,call_year,call_quarter,reported_year,reported_quarter,section,speaker,sentence_id,sentence,xml_path
+doc_001,evt_001,Example Corp,EXM,2024-02-15,2024,1,2023,4,presentation,CEO,1,We increased investments in generative AI tools for customer support.,sample_001.xml
+doc_001,evt_001,Example Corp,EXM,2024-02-15,2024,1,2023,4,presentation,CFO,2,Revenue grew across all geographic segments.,sample_001.xml
+doc_001,evt_001,Example Corp,EXM,2024-02-15,2024,1,2023,4,qa,Analyst,3,Can you discuss your machine learning capabilities and AI adoption plans?,sample_001.xml
+doc_002,evt_002,Plain Corp,PLN,2023-08-10,2023,3,2023,2,presentation,CEO,1,We improved our cloud migration timeline.,sample_002.xml
