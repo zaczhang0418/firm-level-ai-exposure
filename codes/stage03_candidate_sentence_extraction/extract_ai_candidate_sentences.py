@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import csv
 import glob
+import hashlib
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -21,7 +22,7 @@ from pathlib import Path
 from typing import Iterable
 
 
-DEFAULT_SENTENCES = "codes/stage01_xml_standardization/outputs/transcript_sentences.csv"
+DEFAULT_SENTENCES = "codes/stage01_xml_standardization/outputs/by_year"
 DEFAULT_LEXICON = "codes/stage02_ai_seed_lexicon/ai_seed_lexicon_v1.csv"
 DEFAULT_OUTPUT = "codes/stage03_candidate_sentence_extraction/outputs/ai_candidate_sentences.csv"
 DEFAULT_SUMMARY = "codes/stage03_candidate_sentence_extraction/outputs/ai_candidate_summary_by_document.csv"
@@ -69,15 +70,31 @@ PASSTHROUGH_COLUMNS = [
 ]
 
 SOURCE_COLUMNS = [
+    "candidate_id",
     "source_csv",
+]
+
+TRAINING_COLUMNS = [
+    "training_text",
+    "previous_sentence",
+    "next_sentence",
+    "context_window",
 ]
 
 MATCH_COLUMNS = [
     "matched_terms",
+    "matched_texts",
+    "match_spans",
     "matched_concept_groups",
     "matched_priorities",
     "matched_term_count",
     "total_match_count",
+]
+
+LABEL_COLUMNS = [
+    "label_ai_relevant",
+    "label_source",
+    "label_notes",
 ]
 
 SUMMARY_COLUMNS = [
@@ -107,6 +124,17 @@ class SeedTerm:
     match_type: str
     priority: str
     pattern: re.Pattern[str]
+
+
+@dataclass(frozen=True)
+class SeedMatch:
+    seed: SeedTerm
+    texts: tuple[str, ...]
+    spans: tuple[tuple[int, int], ...]
+
+    @property
+    def count(self) -> int:
+        return len(self.texts)
 
 
 def parse_args() -> argparse.Namespace:
@@ -149,11 +177,81 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Keep standalone AI when a longer AI phrase also matches the sentence.",
     )
+    parser.add_argument(
+        "--progress-every",
+        type=int,
+        default=10000,
+        help="Print progress every N scanned sentence rows. Use 0 to disable row progress.",
+    )
     return parser.parse_args()
 
 
 def normalize_whitespace(value: str) -> str:
     return re.sub(r"\s+", " ", value or "").strip()
+
+
+def slugify_id(value: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9]+", "_", value or "").strip("_")
+    return cleaned or "missing"
+
+
+def make_candidate_id(row: dict[str, str], source_csv: str) -> str:
+    document_id = slugify_id(row.get("document_id", ""))
+    event_id = slugify_id(row.get("event_id", ""))
+    sentence_id = slugify_id(row.get("sentence_id", ""))
+    if document_id != "missing" and sentence_id != "missing":
+        return f"{document_id}__{sentence_id}"
+    fallback = "|".join(
+        [
+            source_csv,
+            row.get("document_id", ""),
+            row.get("event_id", ""),
+            row.get("sentence_id", ""),
+            row.get("sentence", ""),
+        ]
+    )
+    digest = hashlib.sha1(fallback.encode("utf-8")).hexdigest()[:16]
+    return f"{document_id}__{event_id}__{sentence_id}__{digest}"
+
+
+def format_context(previous_sentence: str, sentence: str, next_sentence: str) -> str:
+    parts = [
+        normalize_whitespace(previous_sentence),
+        normalize_whitespace(sentence),
+        normalize_whitespace(next_sentence),
+    ]
+    return " [SEP] ".join(part for part in parts if part)
+
+
+def iter_rows_with_context(
+    reader: Iterable[dict[str, str]],
+) -> Iterable[tuple[dict[str, str], str, str]]:
+    previous_row: dict[str, str] | None = None
+    current_row: dict[str, str] | None = None
+
+    for next_row in reader:
+        if current_row is None:
+            current_row = next_row
+            continue
+
+        current_document_id = current_row.get("document_id", "")
+        previous_sentence = ""
+        next_sentence = ""
+        if previous_row and previous_row.get("document_id", "") == current_document_id:
+            previous_sentence = previous_row.get("sentence", "")
+        if next_row.get("document_id", "") == current_document_id:
+            next_sentence = next_row.get("sentence", "")
+
+        yield current_row, previous_sentence, next_sentence
+        previous_row = current_row
+        current_row = next_row
+
+    if current_row is not None:
+        current_document_id = current_row.get("document_id", "")
+        previous_sentence = ""
+        if previous_row and previous_row.get("document_id", "") == current_document_id:
+            previous_sentence = previous_row.get("sentence", "")
+        yield current_row, previous_sentence, ""
 
 
 def flexible_escaped_term(term: str) -> str:
@@ -239,19 +337,25 @@ def find_matches(
     sentence: str,
     seed_terms: list[SeedTerm],
     keep_generic_ai_with_longer_match: bool,
-) -> list[tuple[SeedTerm, int]]:
-    matches: list[tuple[SeedTerm, int]] = []
+) -> list[SeedMatch]:
+    matches: list[SeedMatch] = []
     for seed in seed_terms:
-        count = len(seed.pattern.findall(sentence))
-        if count:
-            matches.append((seed, count))
+        regex_matches = list(seed.pattern.finditer(sentence))
+        if regex_matches:
+            matches.append(
+                SeedMatch(
+                    seed=seed,
+                    texts=tuple(match.group(0) for match in regex_matches),
+                    spans=tuple((match.start(), match.end()) for match in regex_matches),
+                )
+            )
 
     if keep_generic_ai_with_longer_match:
         return matches
 
-    has_longer_ai_match = any(seed.term.lower() != "ai" for seed, _ in matches)
+    has_longer_ai_match = any(match.seed.term.lower() != "ai" for match in matches)
     if has_longer_ai_match:
-        matches = [(seed, count) for seed, count in matches if seed.term.lower() != "ai"]
+        matches = [match for match in matches if match.seed.term.lower() != "ai"]
     return matches
 
 
@@ -269,7 +373,7 @@ def update_summary(
     summary: dict[str, object],
     row: dict[str, str],
     source_csv: str,
-    matches: list[tuple[SeedTerm, int]],
+    matches: list[SeedMatch],
 ) -> None:
     summary["total_sentences"] = int(summary.get("total_sentences", 0)) + 1
     for column in SUMMARY_COLUMNS[:9]:
@@ -277,16 +381,14 @@ def update_summary(
     summary.setdefault("source_csv", source_csv)
     if matches:
         summary["candidate_sentences"] = int(summary.get("candidate_sentences", 0)) + 1
-        summary["total_seed_matches"] = int(summary.get("total_seed_matches", 0)) + sum(
-            count for _, count in matches
-        )
+        summary["total_seed_matches"] = int(summary.get("total_seed_matches", 0)) + sum(match.count for match in matches)
         term_counter = summary.setdefault("term_counter", Counter())
         group_counter = summary.setdefault("group_counter", Counter())
         assert isinstance(term_counter, Counter)
         assert isinstance(group_counter, Counter)
-        for seed, count in matches:
-            term_counter[seed.term] += count
-            group_counter[seed.concept_group] += count
+        for match in matches:
+            term_counter[match.seed.term] += match.count
+            group_counter[match.seed.concept_group] += match.count
 
 
 def write_summary(summary_output: Path, summaries: dict[str, dict[str, object]]) -> None:
@@ -333,6 +435,7 @@ def extract_candidates(
     include_review: bool,
     limit: int | None,
     keep_generic_ai_with_longer_match: bool,
+    progress_every: int,
 ) -> tuple[int, int, int]:
     seed_terms = load_seed_terms(
         lexicon_path=lexicon_path,
@@ -350,20 +453,29 @@ def extract_candidates(
     total_matches = 0
 
     sentence_paths = resolve_sentence_paths(str(sentences_path))
+    print(f"Loaded seed terms: {len(seed_terms)}")
+    print(f"Sentence CSV files found: {len(sentence_paths)}")
 
     with output_path.open("w", encoding="utf-8", newline="") as output_handle:
-        writer = csv.DictWriter(output_handle, fieldnames=PASSTHROUGH_COLUMNS + SOURCE_COLUMNS + MATCH_COLUMNS)
+        writer = csv.DictWriter(
+            output_handle,
+            fieldnames=PASSTHROUGH_COLUMNS + SOURCE_COLUMNS + TRAINING_COLUMNS + MATCH_COLUMNS + LABEL_COLUMNS,
+        )
         writer.writeheader()
 
         for sentence_path in sentence_paths:
+            print(f"Scanning: {sentence_path}")
             with sentence_path.open("r", encoding="utf-8-sig", newline="") as input_handle:
                 reader = csv.DictReader(input_handle)
                 validate_columns(reader.fieldnames, REQUIRED_SENTENCE_COLUMNS, sentence_path)
+                file_scanned_rows = 0
+                print("Streaming rows from file.")
 
-                for row in reader:
+                for row, previous_sentence, next_sentence in iter_rows_with_context(reader):
                     if limit is not None and scanned_rows >= limit:
                         break
                     scanned_rows += 1
+                    file_scanned_rows += 1
                     sentence = row.get("sentence", "")
                     matches = find_matches(
                         sentence=sentence,
@@ -374,24 +486,53 @@ def extract_candidates(
                     update_summary(summaries[document_id], row, str(sentence_path), matches)
 
                     if not matches:
+                        if progress_every and scanned_rows % progress_every == 0:
+                            print(
+                                "Progress: "
+                                f"scanned={scanned_rows:,}, "
+                                f"candidates={candidate_rows:,}, "
+                                f"matches={total_matches:,}"
+                            )
                         continue
 
                     candidate_rows += 1
-                    total_matches += sum(count for _, count in matches)
+                    total_matches += sum(match.count for match in matches)
+                    if progress_every and scanned_rows % progress_every == 0:
+                        print(
+                            "Progress: "
+                            f"scanned={scanned_rows:,}, "
+                            f"candidates={candidate_rows:,}, "
+                            f"matches={total_matches:,}"
+                        )
                     writer.writerow(
                         {
                             **{column: row.get(column, "") for column in PASSTHROUGH_COLUMNS},
+                            "candidate_id": make_candidate_id(row, str(sentence_path)),
                             "source_csv": str(sentence_path),
-                            "matched_terms": unique_join(seed.term for seed, _ in matches),
-                            "matched_concept_groups": unique_join(seed.concept_group for seed, _ in matches),
-                            "matched_priorities": unique_join(seed.priority for seed, _ in matches),
+                            "training_text": normalize_whitespace(sentence),
+                            "previous_sentence": normalize_whitespace(previous_sentence),
+                            "next_sentence": normalize_whitespace(next_sentence),
+                            "context_window": format_context(previous_sentence, sentence, next_sentence),
+                            "matched_terms": unique_join(match.seed.term for match in matches),
+                            "matched_texts": unique_join(text for match in matches for text in match.texts),
+                            "match_spans": ";".join(
+                                f"{match.seed.term}:{start}-{end}"
+                                for match in matches
+                                for start, end in match.spans
+                            ),
+                            "matched_concept_groups": unique_join(match.seed.concept_group for match in matches),
+                            "matched_priorities": unique_join(match.seed.priority for match in matches),
                             "matched_term_count": len(matches),
-                            "total_match_count": sum(count for _, count in matches),
+                            "total_match_count": sum(match.count for match in matches),
+                            "label_ai_relevant": "",
+                            "label_source": "",
+                            "label_notes": "",
                         }
                     )
 
                 if limit is not None and scanned_rows >= limit:
                     break
+                print(f"Finished file: {sentence_path} rows={file_scanned_rows:,}")
 
     write_summary(summary_output, summaries)
     return scanned_rows, candidate_rows, total_matches
@@ -407,6 +548,7 @@ def main() -> None:
         include_review=args.include_review,
         limit=args.limit,
         keep_generic_ai_with_longer_match=args.keep_generic_ai_with_longer_match,
+        progress_every=args.progress_every,
     )
     share = candidate_rows / scanned_rows if scanned_rows else 0
     print(f"Scanned sentence rows: {scanned_rows}")

@@ -19,7 +19,7 @@ This is not the final AI exposure measure. It is the candidate extraction layer 
 Sentence table from Stage 01:
 
 ```text
-codes/stage01_xml_standardization/outputs/transcript_sentences.csv
+codes/stage01_xml_standardization/outputs/by_year
 ```
 
 The `--sentences` argument can be:
@@ -82,13 +82,42 @@ speaker
 sentence_id
 sentence
 xml_path
+candidate_id
 source_csv
+training_text
+previous_sentence
+next_sentence
+context_window
 matched_terms
+matched_texts
+match_spans
 matched_concept_groups
 matched_priorities
 matched_term_count
 total_match_count
+label_ai_relevant
+label_source
+label_notes
 ```
+
+Downstream-oriented fields:
+
+| Column | Purpose |
+|---|---|
+| `candidate_id` | Stable row identifier for manual labels and classifier training joins |
+| `training_text` | Whitespace-normalized candidate sentence for FinBERT or other text classifiers |
+| `previous_sentence` / `next_sentence` | Same-document neighboring sentences for context-aware review |
+| `context_window` | Previous/current/next sentence joined by `[SEP]`, useful for classifier experiments |
+| `matched_texts` | Exact text spans found in the sentence, preserving original casing |
+| `match_spans` | Character offsets for each seed hit as `term:start-end` |
+| `label_ai_relevant` | Empty placeholder for manual binary labels before classifier training |
+| `label_source` | Empty placeholder for annotator/model/provenance notes |
+| `label_notes` | Empty placeholder for reviewer comments |
+ 
+For Word2Vec expansion, use the candidate rows plus `matched_terms`,
+`matched_concept_groups`, and `context_window` to inspect nearby terminology.
+For FinBERT/classifier training, use `candidate_id`, `training_text`, preserved
+metadata, matching evidence, and the label placeholder columns.
 
 Document-level summary:
 
@@ -123,6 +152,48 @@ Default command:
 
 ```bash
 python3 codes/stage03_candidate_sentence_extraction/extract_ai_candidate_sentences.py
+```
+
+By default, this scans every yearly Stage 01 sentence file under:
+
+```text
+codes/stage01_xml_standardization/outputs/by_year/*/transcript_sentences.csv
+```
+
+The script prints progress as it loads each yearly CSV and every 10,000 scanned
+sentence rows. To change the reporting frequency:
+
+```bash
+python3 codes/stage03_candidate_sentence_extraction/extract_ai_candidate_sentences.py \
+  --progress-every 50000
+```
+
+## Parallel Yearly Run And Resume
+
+For the full 2001-2024 sample on Windows, prefer the yearly parallel runner:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\codes\stage03_candidate_sentence_extraction\run_stage03_by_year_parallel.ps1 `
+  -StartYear 2001 `
+  -EndYear 2024 `
+  -MaxJobs 4 `
+  -ProgressEvery 10000
+```
+
+This runs each year independently and writes:
+
+```text
+codes/stage03_candidate_sentence_extraction/outputs/by_year_parts/
+codes/stage03_candidate_sentence_extraction/outputs/logs/
+```
+
+Each completed year gets a `.done` marker. If the run is interrupted, run the
+same command again; completed years are skipped and unfinished years are rerun.
+At the end, yearly candidate and summary files are merged into:
+
+```text
+codes/stage03_candidate_sentence_extraction/outputs/ai_candidate_sentences.csv
+codes/stage03_candidate_sentence_extraction/outputs/ai_candidate_summary_by_document.csv
 ```
 
 On another machine, point the script to the full Stage 01 output:
