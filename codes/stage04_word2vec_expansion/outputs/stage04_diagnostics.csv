@@ -1,0 +1,29 @@
+metric,value
+timestamp_utc,2026-06-06T03:17:27.016255+00:00
+python,"3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:17:27) [MSC v.1929 64 bit (AMD64)]"
+platform,Windows-11-10.0.26200-SP0
+gensim,4.3.3
+logical_cpu_count,20
+recommended_workers,16
+workers,16
+sentence_files,24
+sentence_input,D:\科研\Firm Level AI Exposure\codes\stage01_xml_standardization\outputs\by_year
+lexicon,D:\科研\Firm Level AI Exposure\codes\stage02_ai_seed_lexicon\ai_seed_lexicon_v1.csv
+included_seed_terms,62
+limit,
+vector_size,200
+window,8
+min_count,5
+epochs,8
+sg,1
+negative,10
+sample,0.0001
+statistical_phrases,True
+phrase_min_count,10
+phrase_threshold,10.0
+model_corpus_count,231581188
+model_total_words,3983908187
+vocab_size,777851
+elapsed_seconds,128090.892
+physical_cpu_count,14
+memory_gb,31.69
