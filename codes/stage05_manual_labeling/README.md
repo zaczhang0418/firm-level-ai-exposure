@@ -70,6 +70,41 @@ codes/stage05_manual_labeling/outputs/by_year/YYYY/ai_candidate_summary_by_docum
 This keeps Stage 03 as the reusable extraction-code stage while making Stage 05
 the home for the reviewed v2 candidate sentence pool.
 
+## Run V2 Candidate Extraction
+
+Use the Stage 05 runner to reuse the Stage 03 extraction code with the reviewed
+v2 lexicon and Stage 05-owned outputs:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\codes\stage05_manual_labeling\run_stage05_v2_by_year_parallel.ps1 `
+  -StartYear 2001 `
+  -EndYear 2024 `
+  -MaxJobs 4 `
+  -ProgressEvery 50000 `
+  -StatusEverySeconds 60
+```
+
+The runner writes resumable yearly parts and logs under:
+
+```text
+codes/stage05_manual_labeling/outputs/by_year_parts/
+codes/stage05_manual_labeling/outputs/logs/
+```
+
+When all requested years finish, it merges the yearly files into:
+
+```text
+codes/stage05_manual_labeling/outputs/ai_candidate_sentences_v2.csv
+codes/stage05_manual_labeling/outputs/ai_candidate_summary_by_document_v2.csv
+```
+
+If the run is interrupted, rerun the same command. Completed year files with
+their `.done` markers are skipped.
+
+`-StatusEverySeconds` controls the main-window heartbeat. It prints the running
+years, elapsed time, current candidate-file size, and the last log line so long
+runs are visibly alive even while background jobs are still working.
+
 ## Labeling Task
 
 After v2 extraction, sample candidate sentences for human labeling. The core
