@@ -1,0 +1,7 @@
+metric,value
+v1_rows,67
+stage04_accepted_rows,230
+stage04_new_rows_added,230
+stage04_duplicates_skipped,0
+v2_rows,297
+v2_included_rows,292

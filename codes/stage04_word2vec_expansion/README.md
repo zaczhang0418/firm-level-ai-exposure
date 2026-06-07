@@ -106,30 +106,6 @@ large language model -> large_language_model
 It also learns statistical bigrams/trigrams from the transcript corpus unless
 `--no-statistical-phrases` is passed.
 
-## Smoke Test
-
-Run a small local benchmark before full training:
-
-```powershell
-python .\codes\stage04_word2vec_expansion\smoke_test_word2vec.py `
-  --sample-rows 25000 `
-  --worker-candidates 1,8,16
-```
-
-This writes:
-
-```text
-codes/stage04_word2vec_expansion/outputs/smoke_test/smoke_test_summary.csv
-```
-
-On this machine the default worker rule is:
-
-```text
-workers = min(logical_cpu_count - 2, 16)
-```
-
-With 20 logical CPUs, the default is `workers=16`.
-
 ## Full Training
 
 Recommended full run:
@@ -281,3 +257,147 @@ Stage 02 ai_seed_lexicon_v1.csv
 The reviewed v2 lexicon should then be used to rerun Stage 03 against the full
 Stage 01 sentence corpus, producing a separate v2 candidate pool rather than
 overwriting the v1 baseline.
+
+### Optional Auto Screening
+
+Before manual review, run the conservative auto-screening helper:
+
+```powershell
+python .\codes\stage04_word2vec_expansion\screen_word2vec_candidates.py
+```
+
+This reads:
+
+```text
+codes/stage04_word2vec_expansion/outputs/expanded_ai_terms_candidates.csv
+```
+
+and writes:
+
+```text
+codes/stage04_word2vec_expansion/outputs/expanded_ai_terms_candidates_screened.csv
+codes/stage04_word2vec_expansion/outputs/stage04_auto_screen_summary.csv
+```
+
+The screened file pre-fills `review_decision`, `include_v2`, and `review_notes`
+using auditable rules:
+
+```text
+accept / include_v2=1: explicit AI or ML signal with Word2Vec support
+reject / include_v2=0: low-evidence single-seed noise
+too_broad / include_v2=0: generic business or technology terms
+maybe / include_v2 blank: needs human domain review
+```
+
+It also adds `review_priority` and `suggested_review_group`, then sorts the CSV
+as a review queue: all `maybe` rows appear first, ordered from strongest
+multi-seed support to lower-priority manual review; automatic accepts and
+rejects follow afterward.
+
+The original candidate file is left unchanged. Treat the screened file as a
+review draft: focus manual effort on `maybe` rows and spot-check the automatic
+`accept` and `too_broad` decisions before creating the official v2 lexicon.
+
+### Final Screening Logic Used
+
+The actual Stage 04 review followed a two-step procedure:
+
+```text
+1. Automated triage:
+   expanded_ai_terms_candidates.csv
+   -> screen_word2vec_candidates.py
+   -> expanded_ai_terms_candidates_screened.csv
+
+2. Human review:
+   manually update review_decision/include_v2 in the screened CSV
+   -> final accepted Stage 04 expansion terms
+```
+
+The auto-screening script is only a triage helper. It uses transparent rules to
+sort the 772 Word2Vec candidates into:
+
+```text
+accept: explicit AI/ML/LLM/NLP/CV/generative-AI terms with Word2Vec support
+reject: low-evidence one-seed noise, names, products, or unrelated context terms
+too_broad: generic business/digital/automation terms that are too broad alone
+maybe: gray-area candidates requiring human domain judgment
+```
+
+The `maybe` terms were then manually reviewed in
+`expanded_ai_terms_candidates_screened.csv`. The human review applied this final
+coding rule:
+
+```text
+include_v2 = 1: keep the term for the AI lexicon v2
+include_v2 = 0: exclude the term from the AI lexicon v2
+```
+
+Important: after manual review, do not rerun `screen_word2vec_candidates.py`
+against the same output path unless you intentionally want to regenerate the
+review draft. Rerunning the script rewrites `expanded_ai_terms_candidates_screened.csv`
+from the raw Word2Vec candidates and can overwrite manual `include_v2` edits.
+
+Final Stage 04 screening result:
+
+```text
+expanded_ai_terms_candidates_screened.csv: 772 rows
+accept / include_v2=1: 230 terms
+reject / include_v2=0: 495 terms
+too_broad / include_v2=0: 47 terms
+maybe: 0 terms
+```
+
+This completes the Stage 04 lexicon-expansion review. The accepted
+`include_v2=1` terms should be merged with the Stage 02 v1 seed lexicon to create
+the official reviewed AI lexicon v2.
+
+Reviewed v2 lexicon output:
+
+```text
+codes/stage02_ai_seed_lexicon/ai_seed_lexicon_v2.csv
+codes/stage02_ai_seed_lexicon/ai_seed_lexicon_v2_summary.csv
+```
+
+Merge summary:
+
+```text
+Stage 02 v1 lexicon rows: 67
+Stage 04 accepted expansion rows: 230
+Stage 04 duplicate terms skipped: 0
+Final v2 lexicon rows: 297
+Final v2 included rows used by Stage 03: 292
+```
+
+The v2 file keeps the same column schema as `ai_seed_lexicon_v1.csv`. Stage 04
+expansion rows use `match_type=phrase`, `priority=medium`, `include=1`, and
+store Word2Vec evidence in `evidence_terms` and `notes`.
+
+## Downstream Handoff
+
+The next pipeline step is not another Word2Vec run. Use the reviewed v2 lexicon
+to extract the full candidate sentence pool again:
+
+```text
+Stage 01 all transcript sentences
++ ai_seed_lexicon_v2.csv
+-> Stage 03 rerun / v2 candidate sentence extraction
+-> ai_candidate_sentences_v2.csv
+```
+
+That v2 candidate sentence pool is the input for Stage 05 manual sentence
+labeling. Stage 05 should sample candidate sentences and label whether each
+sentence is truly AI-related:
+
+```text
+label_ai_relevant = 1 / 0
+```
+
+Those labeled sentences become the training/validation data for the FinBERT or
+AI-sentence classifier stage. In short:
+
+```text
+Stage 04 reviewed lexicon v2
+-> rerun Stage 03 extraction with v2
+-> Stage 05 manual sentence labeling
+-> Stage 06 FinBERT/classifier training and application
+```
