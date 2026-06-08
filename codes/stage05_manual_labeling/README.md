@@ -91,7 +91,8 @@ codes/stage05_manual_labeling/outputs/by_year_parts/
 codes/stage05_manual_labeling/outputs/logs/
 ```
 
-When all requested years finish, it merges the yearly files into:
+When the command finishes, it merges all completed yearly files with `.done`
+markers into:
 
 ```text
 codes/stage05_manual_labeling/outputs/ai_candidate_sentences_v2.csv
@@ -99,7 +100,9 @@ codes/stage05_manual_labeling/outputs/ai_candidate_summary_by_document_v2.csv
 ```
 
 If the run is interrupted, rerun the same command. Completed year files with
-their `.done` markers are skipped.
+their `.done` markers are skipped. This means segmented runs still rebuild the
+combined output from every completed year, not only the years requested in the
+latest command.
 
 `-StatusEverySeconds` controls the main-window heartbeat. It prints the running
 years, elapsed time, current candidate-file size, and the last log line so long

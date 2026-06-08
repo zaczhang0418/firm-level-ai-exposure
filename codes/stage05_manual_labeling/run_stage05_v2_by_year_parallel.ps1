@@ -188,26 +188,35 @@ while ($jobs.Count -gt 0) {
     Receive-CompletedJobs
 }
 
-$candidateFiles = $years |
+$completedYears = Get-ChildItem $PartRoot -Filter "ai_candidate_sentences_v2_*.done" |
+    ForEach-Object {
+        $match = [regex]::Match($_.BaseName, "ai_candidate_sentences_v2_(\d{4})")
+        if ($match.Success) {
+            [int]$match.Groups[1].Value
+        }
+    } |
+    Sort-Object
+
+$candidateFiles = $completedYears |
     ForEach-Object { Join-Path $PartRoot "ai_candidate_sentences_v2_$_.csv" } |
     Where-Object { Test-Path $_ }
 
-$summaryFiles = $years |
+$summaryFiles = $completedYears |
     ForEach-Object { Join-Path $PartRoot "ai_candidate_summary_by_document_v2_$_.csv" } |
     Where-Object { Test-Path $_ }
 
 if ($candidateFiles.Count -eq 0) {
-    throw "No yearly Stage 05 v2 candidate files were produced."
+    throw "No completed yearly Stage 05 v2 candidate files were found."
 }
 
 $finalCandidate = Join-Path $OutputRoot "ai_candidate_sentences_v2.csv"
 $finalSummary = Join-Path $OutputRoot "ai_candidate_summary_by_document_v2.csv"
 
-Write-Host "Merging yearly Stage 05 v2 candidate outputs..."
+Write-Host "Merging completed yearly Stage 05 v2 candidate outputs..."
 $candidateFiles | ForEach-Object { Import-Csv $_ } |
     Export-Csv $finalCandidate -NoTypeInformation -Encoding UTF8
 
-Write-Host "Merging yearly Stage 05 v2 summary outputs..."
+Write-Host "Merging completed yearly Stage 05 v2 summary outputs..."
 $summaryFiles | ForEach-Object { Import-Csv $_ } |
     Export-Csv $finalSummary -NoTypeInformation -Encoding UTF8
 
