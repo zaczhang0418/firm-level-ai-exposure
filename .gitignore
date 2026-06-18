@@ -18,6 +18,8 @@ Reference/
 # Generated pipeline outputs.
 codes/**/outputs/*
 !codes/**/outputs/.gitkeep
+!codes/stage05_manual_labeling/outputs/labeling_batches/
+!codes/stage05_manual_labeling/outputs/labeling_batches/**
 codes/**/logs/*
 !codes/**/logs/.gitkeep
 
