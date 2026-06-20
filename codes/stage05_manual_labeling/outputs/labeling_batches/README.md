@@ -13,6 +13,30 @@ round01_sampling_summary.csv
 `round01_ai_labeling_sample.csv` 是第一轮 1,000 句标注样本。  
 `round01_sampling_summary.csv` 记录每类样本抽了多少行，以及抽样框里各类候选句数量。
 
+Round 1 的 1,000 句切分如下：
+
+```text
+random: 400
+  2001-2015: 100
+  2016-2020: 100
+  2021-2022: 100
+  2023-2024: 100
+
+likely_ai: 400
+  2001-2015: 100
+  2016-2020: 100
+  2021-2022: 100
+  2023-2024: 100
+
+hard_case: 200
+  standalone_ai: 100
+  weak_or_noisy_terms: 100
+```
+
+`sample_type` 只表示抽样来源，不表示最终标签。所有行都需要人工填写
+`ai_label`。`likely_ai` 也可能是 false positive，`hard_case` 也可能是真正的
+AI 表述。
+
 ## 标注列
 
 这些列放在 CSV 最左边，人工标注时主要填写它们：
@@ -123,3 +147,25 @@ AI 相关运营使用、AI workforce 或 AI 对公司业务的影响。
 只是关键词误伤、泛科技/数字化表述、非 AI 的 automation/analytics、
 公司名或产品名噪声、金融/index/ticker 噪声、boilerplate，或语义上不构成 AI exposure。
 ```
+
+## 标注完成后
+
+标注完成的 round CSV 是可审计原始批次。进入 Stage 06 FinBERT / classifier
+训练前，应整理为：
+
+```text
+codes/stage05_manual_labeling/outputs/labeled_ai_sentences_v2.csv
+```
+
+Stage 06 使用的核心标签名是 `label_ai_relevant`。整理时将本文件中的
+`ai_label` 映射过去：
+
+```text
+ai_label = 1 -> label_ai_relevant = 1
+ai_label = 0 -> label_ai_relevant = 0
+blank/uncertain -> 不进入训练集，或进入复核队列
+```
+
+建议保留 `confidence`、`false_positive`、`needs_review`、`notes`、
+`sample_type`、`period_or_case` 和追溯 ID，方便后续检查模型在 random、
+likely_ai、hard_case 三类样本上的表现。

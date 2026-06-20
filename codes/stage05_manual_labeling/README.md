@@ -253,17 +253,21 @@ Final target: 3,000-5,000 sentences
   目的：尽量接近 He 的训练样本规模，同时保证正例、负例和难负例都足够。
 ```
 
-第一轮 1,000 句可按如下结构抽样：
+当前已经生成 Round 1 的 1,000 句人工标注样本。第一轮样本不是简单随机
+1,000 句，而是训练导向的混合样本池：
 
 ```text
-400: stratified random sample
-     按年份/时期分层，用于估计候选池真实 precision。
+400: random
+     从完整 Stage 05 AI candidate pool 中按时期分层随机抽取。
+     用途：估计候选池真实 precision 和基础 positive rate。
 
-400: AI-positive-enriched sample
-     优先抽取强 AI 词命中的句子，提高 positive 训练样本比例。
+400: likely_ai
+     从命中强 AI 词的候选句中按时期分层随机抽取。
+     用途：提高训练样本中的正例比例。
 
-200: hard-negative sample
+200: hard_case
      优先抽取 standalone AI、泛科技、automation、analytics 等容易误伤的句子。
+     用途：补足 hard negatives，让 FinBERT 学会过滤 false positives。
 ```
 
 三类样本的目的不同，后续标注和解释时不要混淆：
@@ -278,6 +282,31 @@ AI-positive-enriched:
 hard-negative:
   为了补足难负例，让 FinBERT 学会哪些关键词命中不该算 AI。
 ```
+
+Round 1 的实际切分如下：
+
+```text
+random:
+  2001-2015: 100
+  2016-2020: 100
+  2021-2022: 100
+  2023-2024: 100
+
+likely_ai:
+  2001-2015: 100
+  2016-2020: 100
+  2021-2022: 100
+  2023-2024: 100
+
+hard_case:
+  standalone_ai: 100
+  weak_or_noisy_terms: 100
+```
+
+这里的时期层是为了覆盖 AI language 随时间变化的情况。`2023-2024` 单独成层，
+是因为 generative AI / LLM / ChatGPT 相关表述在这一时期明显增多。
+`hard_case` 不按年份分层，而是按误伤机制分层，因为它的目的不是代表总体，
+而是让分类器学习边界样本。
 
 具体判断标准：
 
@@ -331,6 +360,18 @@ hard_case: 200
 duplicate candidate_id: 0
 ```
 
+`random` 和 `likely_ai` 都按四个时期均分，每层 100 句。`hard_case` 分为
+`standalone_ai` 100 句和 `weak_or_noisy_terms` 100 句。完整抽样框和每类抽样
+数量记录在：
+
+```text
+codes/stage05_manual_labeling/outputs/labeling_batches/round01_sampling_summary.csv
+```
+
+注意：`sample_type` 只说明这句话为什么被抽入人工标注样本，不是标签本身。
+所有样本都必须人工判断 `ai_label`。尤其是 `likely_ai` 仍可能是 false
+positive，`hard_case` 也可能出现真正的 AI 表述。
+
 抽样脚本：
 
 ```text
@@ -380,6 +421,56 @@ xml_path
 ```
 
 `outputs/labeling_batches/README.md` 中有完整列字典和标注规则。
+
+### 标注完成后的训练样本池
+
+人工标注完成后，Round CSV 仍保留在 `outputs/labeling_batches/` 中，作为可审计
+的原始标注批次。提供给 Stage 06 的训练样本池应整理为：
+
+```text
+codes/stage05_manual_labeling/outputs/labeled_ai_sentences_v2.csv
+```
+
+Stage 06 README 使用的核心训练标签名是：
+
+```text
+label_ai_relevant = 1 / 0
+```
+
+因此，整理训练样本池时应将 Round CSV 中的 `ai_label` 映射为
+`label_ai_relevant`：
+
+```text
+ai_label = 1 -> label_ai_relevant = 1
+ai_label = 0 -> label_ai_relevant = 0
+blank/uncertain -> 不进入训练集，或仅进入 review/adjudication 队列
+```
+
+建议保留这些审计字段进入 Stage 06：
+
+```text
+id
+round
+sample_type
+period_or_case
+confidence
+false_positive
+needs_review
+notes
+candidate_id
+document_id
+sentence_id
+terms
+matched_text
+sentence
+prev_sentence
+next_sentence
+context_window
+```
+
+训练和验证拆分时，不要把 `sample_type` 当作 exposure 权重。它可以作为
+diagnostic 变量，用来分别报告 random precision、likely-ai positive rate、
+hard-case false positive filtering performance。
 
 ## Relationship To Other Stages
 
