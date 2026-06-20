@@ -88,6 +88,46 @@ not_applicable
 通常先看 `sentence`。如果判断不清，再看 `prev_sentence`、
 `next_sentence` 或 `context_window`。
 
+## 对话式标注
+
+推荐让 Codex 每次提取一条未标注样本，在对话中展示成更容易阅读的格式，
+再由人工给出最终判断。这样不需要在 CSV 里来回横向滚动，也能避免写错行。
+
+查看进度：
+
+```powershell
+python .\codes\stage05_manual_labeling\labeling_workflow.py status
+```
+
+展示下一条未标注样本：
+
+```powershell
+python .\codes\stage05_manual_labeling\labeling_workflow.py show --next
+```
+
+写回标签：
+
+```powershell
+python .\codes\stage05_manual_labeling\labeling_workflow.py label R01-0001 `
+  --ai-label 1 `
+  --confidence high `
+  --false-positive not_applicable `
+  --needs-review 0 `
+  --notes "Substantive use of machine learning/autonomous coding in operations."
+```
+
+对话中人工可以使用简写：
+
+```text
+1 high
+0 generic_technology: 只是泛科技/数字化表述
+review: 上下文不足，需要复核
+```
+
+Codex 会把简写规范化写入本 round CSV 的 `ai_label`、`confidence`、
+`false_positive`、`needs_review` 和 `notes`。脚本每次写回前会自动生成
+同目录备份文件。
+
 ## 追溯列
 
 这些列一般不需要人工修改，用于回连完整候选池：

@@ -422,6 +422,71 @@ xml_path
 
 `outputs/labeling_batches/README.md` 中有完整列字典和标注规则。
 
+### 对话式标注工作流
+
+Round CSV 可以直接人工编辑，但推荐用 Codex 对话式标注来减少横向滚动和写错行的风险：
+
+```text
+Codex 读取下一条未标注样本
+-> 展示命中句、前后句、上下文、命中词和追溯 ID
+-> Codex 给出初步建议、理由和不确定点
+-> 人工回复 1 / 0 / 备注 / 需要复核
+-> Codex 写回 round CSV
+```
+
+辅助脚本：
+
+```text
+codes/stage05_manual_labeling/labeling_workflow.py
+```
+
+查看当前进度：
+
+```powershell
+python .\codes\stage05_manual_labeling\labeling_workflow.py status
+```
+
+展示下一条未标注样本：
+
+```powershell
+python .\codes\stage05_manual_labeling\labeling_workflow.py show --next
+```
+
+写回一个标签：
+
+```powershell
+python .\codes\stage05_manual_labeling\labeling_workflow.py label R01-0001 `
+  --ai-label 1 `
+  --confidence high `
+  --false-positive not_applicable `
+  --needs-review 0 `
+  --notes "Substantive use of machine learning/autonomous coding in operations."
+```
+
+如果标为 `0`，`false_positive` 应优先使用：
+
+```text
+standalone_ai_noise
+generic_technology
+automation_without_ai
+company_or_product_name
+financial_or_index_term
+boilerplate
+ambiguous
+not_applicable
+```
+
+在对话中，人工可以只回复简写，例如：
+
+```text
+1 high
+0 company_or_product_name: GPT 是公司名，不是 generative pretrained transformer
+review: 需要查公司产品背景
+```
+
+Codex 再把这些判断规范化写入 `ai_label`、`confidence`、`false_positive`、
+`needs_review` 和 `notes`。标注脚本每次写回前会自动备份当前 round CSV。
+
 ### 标注完成后的训练样本池
 
 人工标注完成后，Round CSV 仍保留在 `outputs/labeling_batches/` 中，作为可审计
