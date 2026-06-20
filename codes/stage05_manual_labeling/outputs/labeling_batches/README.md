@@ -125,8 +125,8 @@ review: 上下文不足，需要复核
 ```
 
 Codex 会把简写规范化写入本 round CSV 的 `ai_label`、`confidence`、
-`false_positive`、`needs_review` 和 `notes`。脚本每次写回前会自动生成
-同目录备份文件。
+`false_positive`、`needs_review` 和 `notes`。脚本默认不生成逐条备份；如需在
+某次写回前备份，可额外传入 `--backup`。
 
 ## 追溯列
 

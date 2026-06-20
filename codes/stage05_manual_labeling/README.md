@@ -485,7 +485,8 @@ review: 需要查公司产品背景
 ```
 
 Codex 再把这些判断规范化写入 `ai_label`、`confidence`、`false_positive`、
-`needs_review` 和 `notes`。标注脚本每次写回前会自动备份当前 round CSV。
+`needs_review` 和 `notes`。标注脚本默认直接写回 round CSV；如需在某次写回前
+生成时间戳备份，可额外传入 `--backup`。
 
 ### 标注完成后的训练样本池
 

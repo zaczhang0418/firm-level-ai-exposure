@@ -54,6 +54,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Allow replacing an existing ai_label.",
     )
+    label.add_argument(
+        "--backup",
+        action="store_true",
+        help="Create a timestamped backup before writing. Default is no per-label backup.",
+    )
 
     export = subparsers.add_parser(
         "export",
@@ -200,6 +205,7 @@ def update_label(
     needs_review: str,
     notes: str,
     overwrite: bool,
+    backup: bool,
 ) -> None:
     row = find_row(rows, row_id)
     if row is None:
@@ -218,10 +224,11 @@ def update_label(
     row["needs_review"] = needs_review
     row["notes"] = notes
 
-    backup = backup_csv(path)
+    backup_path = backup_csv(path) if backup else None
     write_rows(path, fieldnames, rows)
     print(f"Updated {row_id}: ai_label={ai_label}")
-    print(f"Backup: {backup}")
+    if backup_path:
+        print(f"Backup: {backup_path}")
 
 
 def export_labeled(fieldnames: list[str], rows: list[dict[str, str]], output: Path) -> None:
@@ -278,6 +285,7 @@ def main() -> None:
             needs_review=args.needs_review,
             notes=args.notes,
             overwrite=args.overwrite,
+            backup=args.backup,
         )
         return
 
