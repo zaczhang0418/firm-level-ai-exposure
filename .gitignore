@@ -5,6 +5,7 @@
 Data/
 Reference/
 程序包/
+RA申请/
 
 # Large standalone files at project root.
 *.pdf
@@ -20,6 +21,7 @@ codes/**/outputs/*
 !codes/**/outputs/.gitkeep
 !codes/stage05_manual_labeling/outputs/labeling_batches/
 !codes/stage05_manual_labeling/outputs/labeling_batches/**
+codes/stage05_manual_labeling/outputs/labeling_batches/*.backup-*.csv
 codes/**/logs/*
 !codes/**/logs/.gitkeep
 
